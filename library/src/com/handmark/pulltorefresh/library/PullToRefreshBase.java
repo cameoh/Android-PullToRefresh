@@ -841,29 +841,22 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 	}
 
 	@Override
+	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+		super.onLayout(changed, l, t, r, b);
+		mRefreshableViewWrapper.layout(0, 0, r - l, b - t);
+	}
+
+	@Override
 	protected final void onSizeChanged(int w, int h, int oldw, int oldh) {
 		if (DEBUG) {
 			Log.d(LOG_TAG, String.format("onSizeChanged. W: %d, H: %d", w, h));
 		}
-
-		super.onSizeChanged(w, h, oldw, oldh);
 
 		// We need to update the header/footer when our size changes
 		refreshLoadingViewsSize();
 
 		// Update the Refreshable View layout
 		refreshRefreshableViewSize(w, h);
-
-		/**
-		 * As we're currently in a Layout Pass, we need to schedule another one
-		 * to layout any changes we've made here
-		 */
-		post(new Runnable() {
-			@Override
-			public void run() {
-				requestLayout();
-			}
-		});
 	}
 
 	/**
@@ -927,13 +920,11 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 			case HORIZONTAL:
 				if (lp.width != width) {
 					lp.width = width;
-					mRefreshableViewWrapper.requestLayout();
 				}
 				break;
 			case VERTICAL:
 				if (lp.height != height) {
 					lp.height = height;
-					mRefreshableViewWrapper.requestLayout();
 				}
 				break;
 		}
